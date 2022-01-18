@@ -10,6 +10,19 @@ import datetime
 from web3 import Web3
 import json
 
+from constants import(
+    UNDERLYING,
+    MATURITY,
+    DECIMALS,
+    NETWORK_STRING,
+    AMOUNT,
+    UPPER_RATE,
+    LOWER_RATE,
+    NUM_TICKS,
+    COMPOUND_RATE_LEAN,
+    EXPIRY_LENGTH,
+    PUBLIC_KEY,
+)
 
 def truncate(number, digits) -> float:
     stepper = 10.0 ** digits
@@ -318,7 +331,7 @@ def combineAndPlace(queuedOrders, queuedOrderSignatures, timeDiff, newExpiry):
                     print(f'Order Key: {orderKey}')
                     print(white(f'Order Price: {orderPrice}'))
                     print(f'Order Rate: {orderRate}%')
-                    principalString = str(float(apiOrder["meta"]["principalAvailable"])/10**decimals)
+                    principalString = str(float(apiOrder["meta"]["principalAvailable"])/10**DECIMALS)
                     print(f'Order Amount: {principalString} nTokens')
                     print(f'Order Response: {orderResponse}\n')
 
@@ -329,7 +342,7 @@ def combineAndPlace(queuedOrders, queuedOrderSignatures, timeDiff, newExpiry):
                     usedOrderKeys.append(orderKey)    
                 else:
                     # create and place the combined order
-                    combinedOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=True, exit=baseOrder['exit'], principal=int(combinedPrincipal), premium=int(combinedPremium), expiry=int(newExpiry))
+                    combinedOrder = new_order(PUBLIC_KEY, underlying=UNDERLYING, maturity=int(MATURITY), vault=True, exit=baseOrder['exit'], principal=int(combinedPrincipal), premium=int(combinedPremium), expiry=int(newExpiry))
                     signature = vendor.sign_order(combinedOrder, network, swivelAddress)
                     
                     orderResponse = limit_order(stringify(combinedOrder), signature, network)
@@ -360,7 +373,7 @@ def combineAndPlace(queuedOrders, queuedOrderSignatures, timeDiff, newExpiry):
                     print(f'Order Key: {combinedOrderKey}')
                     print(white(f'Order Price: {combinedOrderPrice}'))
                     print(f'Order Rate: {orderRate}%')
-                    principalString = str(combinedPrincipal/10**decimals)
+                    principalString = str(combinedPrincipal/10**DECIMALS)
                     print(f'Order Amount: {principalString} nTokens')
                     print(f'Order Response: {orderResponse}\n')
 
@@ -399,15 +412,15 @@ def adjustAndQueue(underlying, maturity, expiryLength, orders):
         print(green(str(compoundRateDiff*100)+'%'))
         verb = 'increased'
         print(white('This change has ') + green(verb) + white(' nToken prices:'))
-        print(green(str(truncate((float(compoundRateDiff)*100*float(compoundRateLean)),6))+'%')+ white(' based on your lean rate \n'))
+        print(green(str(truncate((float(compoundRateDiff)*100*float(COMPOUND_RATE_LEAN)),6))+'%')+ white(' based on your lean rate \n'))
     if compoundRateDiff < 0:
         print(red(str(compoundRateDiff*100)+'%'))
         verb = 'decreased'
         print(white('This change has ') + red(verb) + white(' nToken prices:'))
-        print(red(str(truncate((float(compoundRateDiff)*100*float(compoundRateLean)),6))+'%')+ white(' based on your lean rate \n'))
+        print(red(str(truncate((float(compoundRateDiff)*100*float(COMPOUND_RATE_LEAN)),6))+'%')+ white(' based on your lean rate \n'))
     if compoundRateDiff == 0:
         print(yellow(str(compoundRateDiff*100)+'%'))
-        print(white('This ') + yellow(str(truncate((float(compoundRateDiff)*100*float(compoundRateLean)),6))+'%') + white(' change does') + yellow(' not ') + white('impact nToken prices.\n'))
+        print(white('This ') + yellow(str(truncate((float(compoundRateDiff)*100*float(COMPOUND_RATE_LEAN)),6))+'%') + white(' change does') + yellow(' not ') + white('impact nToken prices.\n'))
 
     
     print(str(expiryLength)+' seconds have passed since the last quote refresh.')
@@ -440,7 +453,7 @@ def adjustAndQueue(underlying, maturity, expiryLength, orders):
             newPrice = price - (price * timeModifier)
 
             # adjust for changes in underlying compound rate
-            compoundAdjustedImpact = newPrice * (compoundRateLean * compoundRateDiff)
+            compoundAdjustedImpact = newPrice * (COMPOUND_RATE_LEAN * compoundRateDiff)
             compoundAdjustedPrice = newPrice + compoundAdjustedImpact
 
             premiumDiff = principalDiff * compoundAdjustedPrice
@@ -471,7 +484,7 @@ def adjustAndQueue(underlying, maturity, expiryLength, orders):
             # print order info
             print(f'Order Key: {reversedOrder["key"].hex()}')
             print(white(f'Order Price: {compoundAdjustedPrice}'))
-            principalString = str(principalDiff/10**decimals)
+            principalString = str(principalDiff/10**DECIMALS)
             print(f'Order Amount: {principalString} nTokens\n')
 
             # if the order is completely filled (or 95% filled), ignore it, otherwise replace the remaining order volume
@@ -498,7 +511,7 @@ def adjustAndQueue(underlying, maturity, expiryLength, orders):
 
                 print(f'Order Key: {replacedOrder["key"].hex()}')
                 print(white(f'Order Price: {compoundAdjustedPrice}'))
-                principalString = str(replacedPrincipal/10**decimals)
+                principalString = str(replacedPrincipal/10**DECIMALS)
                 print(f'Order Amount: {principalString} nTokens\n')
                 
 
@@ -509,7 +522,7 @@ def adjustAndQueue(underlying, maturity, expiryLength, orders):
             newPrice = price - (price * timeModifier)
 
             # adjust for changes in underlying compound rate
-            compoundAdjustedImpact = newPrice * (compoundRateLean * compoundRateDiff)
+            compoundAdjustedImpact = newPrice * (COMPOUND_RATE_LEAN * compoundRateDiff)
             compoundAdjustedPrice = newPrice + compoundAdjustedImpact               
 
             # determine the new premium amount
@@ -534,7 +547,7 @@ def adjustAndQueue(underlying, maturity, expiryLength, orders):
             print(yellow('Queued duplicate (' + typeString + ') Order:'))
             print(f'Order Key: {duplicateOrder["key"].hex()}')
             print(white(f'Order Price: {compoundAdjustedPrice}'))
-            principalString = str(duplicatePrincipal/10**decimals)
+            principalString = str(duplicatePrincipal/10**DECIMALS)
             print(f'Order Amount: {principalString} nTokens\n')
 
     # print queued orders
@@ -569,34 +582,19 @@ def rangeMultiTickMarketMake(underlying, maturity, upperRate, lowerRate, amount,
         return (newOrders)
 
 #-----------------------------------------------------------------------------------------------------------------------
-#-------------------------------------------------Position Setup-------------------------------------------------------- 
+#-----------------------------------------------------Setup-------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------
 
-# Market
-underlying = "0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa" # The underlying token address
-maturity = float(1669957199) # The Swivel market maturity in unix
-decimals = float(18) # The decimals of the underlying token
-networkString = "rinkeby"
-
-# Position
-amount = float(10000) # The amount of nTokens to use market-making
-upperRate = float(13) # The highest rate at which to quote 
-lowerRate = float(9.5) # The lowest rate at which to quote 
-numTicks = int(3) # The number of liquidity ticks to split your amount into (Per side + 1 at market price)
-compoundRateLean = float(1) # How much your quote should change when Compound’s rate varies (e.g. 1 = 1:1 change in price) 
-expiryLength = float(60) # How often orders should be refreshed (in seconds) 
-
-PUBLIC_KEY = "0x3f60008Dfd0EfC03F476D9B489D6C5B13B3eBF2C"
-provider = Web3.HTTPProvider("<YOUR_PROVIDER_KEY>")
+provider = Web3.HTTPProvider("<YOUR_PROVIDER_KEY>") # Can be left blank. Orders can be created without a provider.
 vendor = W3(provider, PUBLIC_KEY)
 
-if networkString == "mainnet":
+if NETWORK_STRING == "mainnet":
     network = 1
     swivelAddress = "0x3b983B701406010866bD68331aAed374fb9f50C9"
-elif networkString == "rinkeby":
+elif NETWORK_STRING == "rinkeby":
     network = 4
     swivelAddress = "0x4ccD4C002216f08218EdE1B13621faa80CecfC98"
-elif networkString == "kovan":
+elif NETWORK_STRING == "kovan":
     network = 42
     swivelAddress = "0x301292f76885b5a20c7dbd0e06F093E9D4e5fA3F"
 else:
@@ -620,10 +618,10 @@ while loop == True:
     queuedOrderSignatures = []
     if recoverString == 'N':
         if initializor == 0:
-            (orders) = initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, expiryLength)
+            (orders) = initialPositionCreation(UNDERLYING, MATURITY, UPPER_RATE, LOWER_RATE, AMOUNT, EXPIRY_LENGTH)
 
         else:
-            (queuedOrders, queuedOrderSignatures, timeDiff, newExpiry) = adjustAndQueue(underlying, maturity, expiryLength, orders)
+            (queuedOrders, queuedOrderSignatures, timeDiff, newExpiry) = adjustAndQueue(UNDERLYING, MATURITY, EXPIRY_LENGTH, orders)
 
             orders = combineAndPlace(queuedOrders,queuedOrderSignatures, timeDiff, newExpiry)
 
@@ -634,7 +632,7 @@ while loop == True:
         try: 
             orders = json.load(open('orders/orders.json'))
 
-            (queuedOrders, queuedOrderSignatures, timeDiff, newExpiry) = adjustAndQueue(underlying, maturity, expiryLength, orders)
+            (queuedOrders, queuedOrderSignatures, timeDiff, newExpiry) = adjustAndQueue(UNDERLYING, MATURITY, EXPIRY_LENGTH, orders)
 
             orders = combineAndPlace(queuedOrders,queuedOrderSignatures, timeDiff, newExpiry)
             with open("orders/orders.json", "w", encoding="utf-8") as writeJsonfile:
@@ -646,10 +644,10 @@ while loop == True:
             exit(1)
 
     initializor += 1
-    compoundRate = underlying_compound_rate(underlying)
+    compoundRate = underlying_compound_rate(UNDERLYING)
 
     # sleep the expiry length
-    countdownRuns = math.floor(expiryLength/30)
+    countdownRuns = math.floor(EXPIRY_LENGTH/30)
     printsRemaining = countdownRuns
     # print time remaining for each countdown run
     for i in range (0, countdownRuns):
