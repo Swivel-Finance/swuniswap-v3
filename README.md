@@ -89,7 +89,7 @@ This is just one example market, it could, of course, be any other active market
 any constants you want for others obviously.
 
 ## Run Swuniswap-v3
-The example files can then be run by (assuming you are in the repo root dir)
+A range strategy on Swivel's exchange can then be run by 
 
     python swuniswap-v3.py
 
