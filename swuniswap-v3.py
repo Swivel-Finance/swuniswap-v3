@@ -43,6 +43,8 @@ def fetchPrice(underlying, maturity, network) -> float:
 def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, expiryLength):
 
     initialOrders = []
+    numBuyOrders = 0
+    numSellOrders = 0
 
     # establish the "market price"
     price = fetchPrice(underlying, math.trunc(maturity), network)
@@ -117,10 +119,12 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
             # create, sign, and place the order
             tickOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=True, exit=False, principal=int(principal), premium=int(premium), expiry=int(expiry))
             signature = vendor.sign_order(tickOrder, network, swivelAddress)
+            numBuyOrders += 1
         else:
             # create, sign, and place the order
             tickOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=True, exit=True, principal=int(principal), premium=int(premium), expiry=int(expiry))
             signature = vendor.sign_order(tickOrder, network, swivelAddress)
+            numSellOrders += 1
 
         orderResponse = limit_order(stringify(tickOrder), signature, network)
         # store order and key
@@ -138,7 +142,11 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
 
         initialOrders.append(apiOrder)
 
-        print(red('Sell Order #'+str(i)))
+
+        if tickOrderPrice < price:
+            print(green('Buy Order #'+str(numBuyOrders)))
+        else:
+            print(red('Sell Order #'+str(numSellOrders)))
         print(white(f'Order Key: {orderKey}'))
         print(f'Order Price: {tickOrderPrice}')
         print(f'Order Rate: {tickRate}')
@@ -162,10 +170,12 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
             # create, sign, and place the order
             tickOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=True, exit=False, principal=int(principal), premium=int(premium), expiry=int(expiry))
             signature = vendor.sign_order(tickOrder, network, swivelAddress)
+            numBuyOrders += 1
         else:
             # create, sign, and place the order
             tickOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=True, exit=True, principal=int(principal), premium=int(premium), expiry=int(expiry))
             signature = vendor.sign_order(tickOrder, network, swivelAddress)
+            numSellOrders += 1
 
         orderResponse = limit_order(stringify(tickOrder), signature, network)
         # store order and key
@@ -182,7 +192,10 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
                 time.sleep(30)
         initialOrders.append(apiOrder)
 
-        print(green('Buy Order #'+str(i)))
+        if tickOrderPrice < price:
+            print(green('Buy Order #'+str(numBuyOrders)))
+        else:
+            print(red('Sell Order #'+str(numSellOrders)))
         print(white(f'Order Key: {orderKey}'))
         print(f'Order Price: {tickOrderPrice}')
         print(f'Order Rate: {tickRate}')
@@ -398,7 +411,7 @@ def adjustAndQueue(underlying, maturity, expiryLength, orders):
 
     
     print(str(expiryLength)+' seconds have passed since the last quote refresh.')
-    print('This has' + red(' reduced ') + white('nToken prices:'))
+    print('This has' + red(' decreased ') + white('nToken prices:'))
     print(cyan(str(timeModifier*100)+'%\n'))
 
     time.sleep(5)
