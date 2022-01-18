@@ -18,10 +18,19 @@
 ```
 
 # Swuniswap-v3
-A Uniswap v3 Equivalent for Swivel's Orderbook
+A Uniswap v3 Equivalent for Swivel's Orderbook.
 
-### PSA
-We suggest you create a virtual environment for this and every python project.
+-----------
+
+**Instructions:**
+
+Set your upper and lower ranges and let Swuniswap-v3 run things from there!
+
+For Strategy Information: https://swivel.substack.com/p/market-making-in-yield-markets
+
+--------
+
+## Installation
 
 #### Install/ensure compatable python version
 This is a python project, i'm just going to assume you have a python available. If not, do that first.
@@ -39,26 +48,19 @@ python3 -m venv /path/to/new/virtual/environment
 https://docs.python.org/3/library/venv.html
 
 With the env made, activate it.
-
+```
 ../Scripts/activate.bat
-
+```
 Now you can move to installing things...
 
-## Installation
-Clone the repo, cd into the rood dir, (activate your virtual env if you have not) then
+#### Installing dependencies
+
+Clone this repo, cd into the directory, (activate your virtual env if you have not) then
 
     pip install -r requirements.txt
 
-### Before you run the examples
-Each of the files in `/scrivel/examples` needs its `shebang` modified to point to the python executable you created with virtualenv.
-For example if you followed the path above
-    
-    #!/home/<your_user_name>/python/scrivel/bin/python
-
-If not, just make it match wherever you put it.
-
 ### Private key
-If you are performing transactions via the Swivel.py Vendor a private key is expected to be available in the shell environment as `PRIVATE_KEY`.
+If you are performing transactions via the Swivel.py Vendor a private key is expected to be available in the environment as `PRIVATE_KEY`.
 This used to sign offline, your private key is never exposed or broadcast in any way.
 
 #### Constants
