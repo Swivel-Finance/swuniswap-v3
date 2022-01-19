@@ -91,10 +91,10 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
     upperPrice = truncate((upperRate * timeModifier / 100),5)
     midPrice = truncate((midRate * timeModifier / 100), 5)
 
-    print(red('Upper (Sell nToken) Range:'))
+    print(red('Upper (Buy zcToken) Range:'))
     print(white(f'Rates: {midRate}% - {upperRate}%'))
     print(f'Prices: {midPrice} - {upperPrice}')
-    print(green('Lower (Buy nToken) Range:'))
+    print(green('Lower (Sell zcToken) Range:'))
     print(white(f'Rates: {lowerRate}% - {midRate}%'))
     print(f'Prices: {lowerPrice} - {midPrice}\n')
     print(cyan('--------------------------'))
