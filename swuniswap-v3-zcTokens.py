@@ -128,14 +128,14 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
         premium = principal*tickPrice
         tickOrderPrice = premium/principal
 
-        if tickOrderPrice < price:
+        if tickOrderPrice > price:
             # create, sign, and place the order
-            tickOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=True, exit=False, principal=int(principal), premium=int(premium), expiry=int(expiry))
+            tickOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=False, exit=False, principal=int(principal), premium=int(premium), expiry=int(expiry))
             signature = vendor.sign_order(tickOrder, network, swivelAddress)
             numBuyOrders += 1
         else:
             # create, sign, and place the order
-            tickOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=True, exit=True, principal=int(principal), premium=int(premium), expiry=int(expiry))
+            tickOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=False, exit=True, principal=int(principal), premium=int(premium), expiry=int(expiry))
             signature = vendor.sign_order(tickOrder, network, swivelAddress)
             numSellOrders += 1
 
@@ -156,7 +156,7 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
         initialOrders.append(apiOrder)
 
 
-        if tickOrderPrice < price:
+        if tickOrderPrice > price:
             print(green('Buy Order #'+str(numBuyOrders)))
         else:
             print(red('Sell Order #'+str(numSellOrders)))
@@ -164,7 +164,7 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
         print(f'Order Price: {tickOrderPrice}')
         print(f'Order Rate: {tickRate}')
         principalString = str(principal/10**DECIMALS)
-        print(f'Order Amount: {principalString} nTokens')
+        print(f'Order Amount: {principalString} zcTokens')
         print(f'Order Response: {orderResponse}\n')
 
     for i in range(1,NUM_TICKS+1):
@@ -179,14 +179,14 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
         premium = tickAmount * tickPrice
         tickOrderPrice = premium/principal
 
-        if tickOrderPrice < price:
+        if tickOrderPrice > price:
             # create, sign, and place the order
-            tickOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=True, exit=False, principal=int(principal), premium=int(premium), expiry=int(expiry))
+            tickOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=False, exit=False, principal=int(principal), premium=int(premium), expiry=int(expiry))
             signature = vendor.sign_order(tickOrder, network, swivelAddress)
             numBuyOrders += 1
         else:
             # create, sign, and place the order
-            tickOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=True, exit=True, principal=int(principal), premium=int(premium), expiry=int(expiry))
+            tickOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=False, exit=True, principal=int(principal), premium=int(premium), expiry=int(expiry))
             signature = vendor.sign_order(tickOrder, network, swivelAddress)
             numSellOrders += 1
 
@@ -205,7 +205,7 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
                 time.sleep(30)
         initialOrders.append(apiOrder)
 
-        if tickOrderPrice < price:
+        if tickOrderPrice > price:
             print(green('Buy Order #'+str(numBuyOrders)))
         else:
             print(red('Sell Order #'+str(numSellOrders)))
@@ -213,7 +213,7 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
         print(f'Order Price: {tickOrderPrice}')
         print(f'Order Rate: {tickRate}')
         principalString = str(principal/10**DECIMALS)
-        print(f'Order Amount: {principalString} nTokens')
+        print(f'Order Amount: {principalString} zcTokens')
         print(f'Order Response: {orderResponse}\n')
 
     # Place the middle tick's order
@@ -223,11 +223,11 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
 
     # create, sign, and place the order
     if midPrice > price:
-        tickOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=True, exit=True, principal=int(principal), premium=int(premium), expiry=int(expiry))
-        signature = vendor.sign_order(tickOrder, network, swivelAddress)
-    else:
-        tickOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=True, exit=False, principal=int(principal), premium=int(premium), expiry=int(expiry))
+        tickOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=False, exit=False, principal=int(principal), premium=int(premium), expiry=int(expiry))
         signature = vendor.sign_order(tickOrder, network, swivelAddress) 
+    else:
+        tickOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=False, exit=True, principal=int(principal), premium=int(premium), expiry=int(expiry))
+        signature = vendor.sign_order(tickOrder, network, swivelAddress)
 
     orderResponse = limit_order(stringify(tickOrder), signature, network)
     orderKey = tickOrder['key'].hex()
@@ -242,7 +242,7 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
             print("Retrying in 30s...")
             time.sleep(30)
     initialOrders.append(apiOrder)
-    if midPrice > price:
+    if midPrice < price:
         print(red('Mid-Range Sell Order'))
     else:
         print(green('Mid-Range Buy Order'))
@@ -250,7 +250,7 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
     print(f'Order Price: {midPrice}')
     print(f'Order Rate: {midRate}')
     principalString = str(principal/10**DECIMALS)
-    print(f'Order Amount: {principalString} nTokens')
+    print(f'Order Amount: {principalString} zcTokens')
     print(f'Order Response: {orderResponse}\n')
 
     return (initialOrders)
@@ -332,7 +332,7 @@ def combineAndPlace(queuedOrders, queuedOrderSignatures, timeDiff, newExpiry):
                     print(white(f'Order Price: {orderPrice}'))
                     print(f'Order Rate: {orderRate}%')
                     principalString = str(float(apiOrder["meta"]["principalAvailable"])/10**DECIMALS)
-                    print(f'Order Amount: {principalString} nTokens')
+                    print(f'Order Amount: {principalString} zcTokens')
                     print(f'Order Response: {orderResponse}\n')
 
                     # append the placed order to the list
@@ -342,7 +342,7 @@ def combineAndPlace(queuedOrders, queuedOrderSignatures, timeDiff, newExpiry):
                     usedOrderKeys.append(orderKey)    
                 else:
                     # create and place the combined order
-                    combinedOrder = new_order(PUBLIC_KEY, underlying=UNDERLYING, maturity=int(MATURITY), vault=True, exit=baseOrder['exit'], principal=int(combinedPrincipal), premium=int(combinedPremium), expiry=int(newExpiry))
+                    combinedOrder = new_order(PUBLIC_KEY, underlying=UNDERLYING, maturity=int(MATURITY), vault=False, exit=baseOrder['exit'], principal=int(combinedPrincipal), premium=int(combinedPremium), expiry=int(newExpiry))
                     signature = vendor.sign_order(combinedOrder, network, swivelAddress)
                     
                     orderResponse = limit_order(stringify(combinedOrder), signature, network)
@@ -374,7 +374,7 @@ def combineAndPlace(queuedOrders, queuedOrderSignatures, timeDiff, newExpiry):
                     print(white(f'Order Price: {combinedOrderPrice}'))
                     print(f'Order Rate: {orderRate}%')
                     principalString = str(combinedPrincipal/10**DECIMALS)
-                    print(f'Order Amount: {principalString} nTokens')
+                    print(f'Order Amount: {principalString} zcTokens')
                     print(f'Order Response: {orderResponse}\n')
 
                     # mark the order as "used"
@@ -464,14 +464,14 @@ def adjustAndQueue(underlying, maturity, expiryLength, orders):
 
             # determine order type and create the new order
             if orderType == True:
-                reversedOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=True, exit=False, principal=int(principalDiff), premium=int(premiumDiff), expiry=int(newExpiry))
+                reversedOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=False, exit=False, principal=int(principalDiff), premium=int(premiumDiff), expiry=int(newExpiry))
                 signature = vendor.sign_order(reversedOrder, network, swivelAddress)     
                 reversedTypeString = 'Buy'
                 typeString = 'Sell'
                 print(green('Queued ('+reversedTypeString+') Order:'))
 
             else:
-                reversedOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=True, exit=True, principal=int(principalDiff), premium=int(premiumDiff), expiry=int(newExpiry))
+                reversedOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=False, exit=True, principal=int(principalDiff), premium=int(premiumDiff), expiry=int(newExpiry))
                 signature = vendor.sign_order(reversedOrder, network, swivelAddress)    
                 reversedTypeString = 'Sell' 
                 typeString = 'Buy'
@@ -485,7 +485,7 @@ def adjustAndQueue(underlying, maturity, expiryLength, orders):
             print(f'Order Key: {reversedOrder["key"].hex()}')
             print(white(f'Order Price: {compoundAdjustedPrice}'))
             principalString = str(principalDiff/10**DECIMALS)
-            print(f'Order Amount: {principalString} nTokens\n')
+            print(f'Order Amount: {principalString} zcTokens\n')
 
             # if the order is completely filled (or 95% filled), ignore it, otherwise replace the remaining order volume
             if float(returnedOrder['meta']['principalAvailable']) <= (float(orders[i]['order']['principal']) * .05):
@@ -495,7 +495,7 @@ def adjustAndQueue(underlying, maturity, expiryLength, orders):
                 replacedPrincipal = float(returnedOrder['meta']['principalAvailable'])
                 recplacedPremium = replacedPrincipal * compoundAdjustedPrice
                 
-                replacedOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=True, exit=orderType, principal=int(replacedPrincipal), premium=int(recplacedPremium), expiry=int(newExpiry))
+                replacedOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=False, exit=orderType, principal=int(replacedPrincipal), premium=int(recplacedPremium), expiry=int(newExpiry))
                 signature = vendor.sign_order(replacedOrder, network, swivelAddress)
 
                 # append the replaced order to the queue
@@ -512,7 +512,7 @@ def adjustAndQueue(underlying, maturity, expiryLength, orders):
                 print(f'Order Key: {replacedOrder["key"].hex()}')
                 print(white(f'Order Price: {compoundAdjustedPrice}'))
                 principalString = str(replacedPrincipal/10**DECIMALS)
-                print(f'Order Amount: {principalString} nTokens\n')
+                print(f'Order Amount: {principalString} zcTokens\n')
                 
 
         # if the order has not been filled, adjust for time difference and queue a new order at the same rate and principal
@@ -536,7 +536,7 @@ def adjustAndQueue(underlying, maturity, expiryLength, orders):
                 typeString = "Sell"
             else:
                 typeString = "Buy"
-            duplicateOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=True, exit=orderExit, principal=int(duplicatePrincipal), premium=int(duplicatePremium), expiry=int(newExpiry))
+            duplicateOrder = new_order(PUBLIC_KEY, underlying=underlying, maturity=int(maturity), vault=False, exit=orderExit, principal=int(duplicatePrincipal), premium=int(duplicatePremium), expiry=int(newExpiry))
             signature = vendor.sign_order(duplicateOrder, network, swivelAddress)
 
             # append the duplicate order to the queue
@@ -548,7 +548,7 @@ def adjustAndQueue(underlying, maturity, expiryLength, orders):
             print(f'Order Key: {duplicateOrder["key"].hex()}')
             print(white(f'Order Price: {compoundAdjustedPrice}'))
             principalString = str(duplicatePrincipal/10**DECIMALS)
-            print(f'Order Amount: {principalString} nTokens\n')
+            print(f'Order Amount: {principalString} zcTokens\n')
 
     # print queued orders
     print(magenta('Queued Orders:'))
@@ -556,9 +556,9 @@ def adjustAndQueue(underlying, maturity, expiryLength, orders):
         orderExit = queuedOrders[i]['exit']
         orderKey = "0x..." + queuedOrders[i]['key'].hex()[-4:]
         if orderExit == True:
-            orderType = "Sell nTokens"
+            orderType = "Sell zcTokens"
         else:
-            orderType = "Buy nTokens"
+            orderType = "Buy zcTokens"
         orderPrice = round(float(queuedOrders[i]['premium']) / float(queuedOrders[i]['principal']),6)
         orderNum = i+1
         print(white(f'{orderNum}. Type: {orderType}   Order Key: {orderKey}   Order Price: {orderPrice}'))
