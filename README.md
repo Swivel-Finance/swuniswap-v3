@@ -18,7 +18,7 @@
 ```
 
 # Swuniswap-v3
-A Uniswap v3 Equivalent for Swivel's Orderbook.
+A Uniswap v3-esque implementation for Swivel's Orderbook.
 
 -----------
 
