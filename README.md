@@ -32,7 +32,7 @@ This strategy takes a user defined range and allocates user liquidity across tha
 
 After this initial liquidity allocation, the strategy continuously adjusts prices according to the factors discussed in the article above (Underlying Rates and Theta).
 
-Once every X seconds, orders expire and are replaced with newly updated quotes.
+Specifically, the strategy accomplishes this by ensuring orders are only valid for a limited time, and once expired are replaced with newly updated quotes.
 
 --------
 
