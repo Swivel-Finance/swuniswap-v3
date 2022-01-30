@@ -594,9 +594,6 @@ if NETWORK_STRING == "mainnet":
 elif NETWORK_STRING == "rinkeby":
     network = 4
     swivelAddress = "0x4ccD4C002216f08218EdE1B13621faa80CecfC98"
-elif NETWORK_STRING == "kovan":
-    network = 42
-    swivelAddress = "0x301292f76885b5a20c7dbd0e06F093E9D4e5fA3F"
 else:
     print("Invalid network")
     exit(1)
@@ -619,7 +616,7 @@ while loop == True:
     if recoverString == 'N':
         if initializor == 0:
             (orders) = initialPositionCreation(UNDERLYING, MATURITY, UPPER_RATE, LOWER_RATE, AMOUNT, EXPIRY_LENGTH)
-
+            compoundRate = underlying_compound_rate(UNDERLYING)
         else:
             (queuedOrders, queuedOrderSignatures, timeDiff, newExpiry) = adjustAndQueue(UNDERLYING, MATURITY, EXPIRY_LENGTH, orders)
 
@@ -627,17 +624,21 @@ while loop == True:
 
         with open("orders/orders.json", "w", encoding="utf-8") as writeJsonfile:
             json.dump(orders, writeJsonfile, indent=4,default=str) 
-
+        with open("orders/compound.json", "w", encoding="utf-8") as writeJsonfile:
+            json.dump(compoundRate, writeJsonfile, indent=4,default=str) 
     else:
-        try: 
+        try:
             orders = json.load(open('orders/orders.json'))
+            compoundRate = json.load(open('orders/compound.json'))
 
             (queuedOrders, queuedOrderSignatures, timeDiff, newExpiry) = adjustAndQueue(UNDERLYING, MATURITY, EXPIRY_LENGTH, orders)
 
             orders = combineAndPlace(queuedOrders,queuedOrderSignatures, timeDiff, newExpiry)
+
             with open("orders/orders.json", "w", encoding="utf-8") as writeJsonfile:
                 json.dump(orders, writeJsonfile, indent=4,default=str) 
-
+            with open("orders/compound.json", "w", encoding="utf-8") as writeJsonfile:
+                json.dump(compoundRate, writeJsonfile, indent=4,default=str)
         except:
             print('No orders to recover...')
             input('Press enter to exit...')

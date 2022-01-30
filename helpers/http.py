@@ -3,7 +3,7 @@ from requests.structures import CaseInsensitiveDict
 
 # the current api-dev exposed for swivel api with a format placeholder
 swivel_api_route = 'https://api-dev.swivel.exchange/v2/{}'
-kovan_api_route = 'https://api-main.swivel.exchange/v2/{}'
+mainnet_api_route = 'https://api-main.swivel.exchange/v2/{}'
 
 # update as needed...
 param_keys = ('underlying', 'maturity', 'depth', 'status')
@@ -54,9 +54,8 @@ def invalidate_order(u, m, n):
         params = new_params(underlying=u, maturity=m)
         resp = requests.delete(route, params=params, auth=('<____>','<____>'))
         return resp.status_code, resp.reason
-    if n == 42:
-
-        route = kovan_api_route.format('orders/{}')
+    if n == 1:
+        route = mainnet_api_route.format('orders/{}')
         params = new_params(underlying=u, maturity=m)
         resp = requests.delete(route, params=params)
         return resp.status_code, resp.reason
@@ -67,9 +66,9 @@ def orderbook(u, m, d, n):
         params = new_params(underlying=u, maturity=m, depth=d)
         resp = requests.get(swivel_api_route.format('orderbook'), params=params)
         return resp.json()
-    if n == 42:
+    if n == 1:
         params = new_params(underlying=u, maturity=m, depth=d)
-        resp = requests.get(kovan_api_route.format('orderbook'), params=params)
+        resp = requests.get(mainnet_api_route.format('orderbook'), params=params)
         return resp.json()
         
 
@@ -83,12 +82,12 @@ def markets(n, status=None):
         resp = requests.get(swivel_api_route.format('markets'), params=params)
         return resp.json()
 
-    if n == 42:
+    if n == 1:
         params = None    
         if status != None:
             params = new_params(status=status)
 
-        resp = requests.get(kovan_api_route.format('markets'), params=params)
+        resp = requests.get(mainnet_api_route.format('markets'), params=params)
         return resp.json()
 
 def last_trade(u, m, n):
@@ -97,9 +96,9 @@ def last_trade(u, m, n):
         params = new_params(underlying=u, maturity=m, depth=1)
         resp = requests.get(swivel_api_route.format('fills'), params=params)
         return resp.json()[0]
-    if n == 42:
+    if n == 1:
         params = new_params(underlying=u, maturity=m, depth=1)
-        resp = requests.get(kovan_api_route.format('fills'), params=params)
+        resp = requests.get(mainnet_api_route.format('fills'), params=params)
         return resp.json()[0]
 
 def orders(u, m, a, n, status=None):
@@ -127,8 +126,8 @@ def orders(u, m, a, n, status=None):
 
         resp = requests.get(route, params)
         return resp.json()
-    if n == 42:
-        route = kovan_api_route.format('users/{}/orders'.format(a))
+    if n == 1:
+        route = mainnet_api_route.format('users/{}/orders'.format(a))
         params = new_params(underlying=u, maturity=m)
 
         if status !=None:
@@ -143,8 +142,8 @@ def order(k, n):
         route = swivel_api_route.format('orders/{}'.format(k))
         resp= requests.get(route)
         return resp.json()
-    if n == 42:
-        route = kovan_api_route.format('orders/{}'.format(k))
+    if n == 1:
+        route = mainnet_api_route.format('orders/{}'.format(k))
         resp= requests.get(route)
         return resp.json()
 
@@ -157,7 +156,7 @@ def limit_order(o, s, n):
     if n == 4:
         resp = requests.post(swivel_api_route.format('orders'), json={'order': o, 'signature': s})
         return resp.status_code, resp.reason
-    if n == 42:
-        resp = requests.post(kovan_api_route.format('orders'), json={'order': o, 'signature': s})
+    if n == 1:
+        resp = requests.post(mainnet_api_route.format('orders'), json={'order': o, 'signature': s})
         return resp.status_code, resp.reason
 

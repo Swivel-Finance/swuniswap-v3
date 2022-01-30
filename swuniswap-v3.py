@@ -70,7 +70,14 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
     price = float(price)
     # use safe allocation of allocated capital
     safeAmount = amount * .999 * 10**int(DECIMALS)
-    midTickAmount = safeAmount / (2 ** (NUM_TICKS+2))
+
+    # Sum martingale weight of all orders
+    sum = 0
+    for i in range (0, NUM_TICKS+1):
+        weight = 2**i
+        sum = sum + weight
+
+    midTickAmount = (safeAmount / (sum)) 
 
     # annualize price to get rate
     timeDiff = maturity - time.time()
@@ -121,7 +128,7 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
         exponent = NUM_TICKS-i
         # determine order size (martingale weighted)
 
-        tickAmount = safeAmount / (2 ** (exponent+1))
+        tickAmount = midTickAmount * 2**i
 
         # set specific order sizes
         principal = tickAmount
@@ -173,7 +180,7 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
 
         exponent = NUM_TICKS-i
 
-        tickAmount = safeAmount / (2 ** (exponent+1))
+        tickAmount = midTickAmount * 2**i
 
         principal = tickAmount 
         premium = tickAmount * tickPrice
@@ -217,7 +224,6 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
         print(f'Order Response: {orderResponse}\n')
 
     # Place the middle tick's order
-    midTickAmount = midTickAmount * 2
     principal = midTickAmount
     premium = principal * midPrice
 
@@ -594,9 +600,6 @@ if NETWORK_STRING == "mainnet":
 elif NETWORK_STRING == "rinkeby":
     network = 4
     swivelAddress = "0x4ccD4C002216f08218EdE1B13621faa80CecfC98"
-elif NETWORK_STRING == "kovan":
-    network = 42
-    swivelAddress = "0x301292f76885b5a20c7dbd0e06F093E9D4e5fA3F"
 else:
     print("Invalid network")
     exit(1)
@@ -619,7 +622,7 @@ while loop == True:
     if recoverString == 'N':
         if initializor == 0:
             (orders) = initialPositionCreation(UNDERLYING, MATURITY, UPPER_RATE, LOWER_RATE, AMOUNT, EXPIRY_LENGTH)
-
+            compoundRate = underlying_compound_rate(UNDERLYING)
         else:
             (queuedOrders, queuedOrderSignatures, timeDiff, newExpiry) = adjustAndQueue(UNDERLYING, MATURITY, EXPIRY_LENGTH, orders)
 
@@ -627,17 +630,21 @@ while loop == True:
 
         with open("orders/orders.json", "w", encoding="utf-8") as writeJsonfile:
             json.dump(orders, writeJsonfile, indent=4,default=str) 
-
+        with open("orders/compound.json", "w", encoding="utf-8") as writeJsonfile:
+            json.dump(compoundRate, writeJsonfile, indent=4,default=str) 
     else:
-        try: 
+        try:
             orders = json.load(open('orders/orders.json'))
+            compoundRate = json.load(open('orders/compound.json'))
 
             (queuedOrders, queuedOrderSignatures, timeDiff, newExpiry) = adjustAndQueue(UNDERLYING, MATURITY, EXPIRY_LENGTH, orders)
 
             orders = combineAndPlace(queuedOrders,queuedOrderSignatures, timeDiff, newExpiry)
+
             with open("orders/orders.json", "w", encoding="utf-8") as writeJsonfile:
                 json.dump(orders, writeJsonfile, indent=4,default=str) 
-
+            with open("orders/compound.json", "w", encoding="utf-8") as writeJsonfile:
+                json.dump(compoundRate, writeJsonfile, indent=4,default=str)
         except:
             print('No orders to recover...')
             input('Press enter to exit...')
