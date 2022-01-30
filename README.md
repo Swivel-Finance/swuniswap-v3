@@ -18,15 +18,21 @@
 ```
 
 # Swuniswap-v3
-A Uniswap v3 Equivalent for Swivel's Orderbook.
+A Uniswap v3-esque implementation for Swivel's Orderbook.
 
 -----------
 
-# **Instructions:**
+# **Introduction:**
 
-Set your upper and lower ranges and let Swuniswap-v3 run things from there!
+Set your upper and lower ranges in /constants and let Swuniswap-v3 run things from there!
 
-For Strategy Information: https://swivel.substack.com/p/market-making-in-yield-markets
+General Strategy Information: https://swivel.substack.com/p/market-making-in-yield-markets
+
+This strategy takes a user defined range and allocates user liquidity across that range, similar to Uniswap v3.
+
+After this initial liquidity allocation, the strategy continuously adjusts prices according to the factors discussed in the article above (Underlying Rates and Theta).
+
+Specifically, the strategy accomplishes this by ensuring orders are only valid for a limited time, and once expired are replaced with newly updated quotes.
 
 --------
 
