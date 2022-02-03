@@ -5,7 +5,8 @@ DECIMALS = float(6) # The decimals of the underlying token
 NETWORK_STRING = "mainnet"
 
 # Position
-AMOUNT = float(50000) # The amount of n/zcTokens to use market-making
+AMOUNT = float(50000) # The amount of n/zcTokens to use market-making 
+# Assumes a 50/50 range distribution around current market rates. If distributions are uneven, more n/zcTokens are required
 UPPER_RATE = float(5.5) # The highest rate at which to quote 
 LOWER_RATE = float(2.75) # The lowest rate at which to quote 
 NUM_TICKS = int(3) # The number of liquidity ticks to split your amount into (Per side + 1 at market price)
