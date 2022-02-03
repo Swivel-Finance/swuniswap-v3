@@ -2,7 +2,6 @@ import os, sys
 from os.path import dirname, join, abspath
 sys.path.insert(0, abspath(join(dirname(__file__), '..', '..')))
 from swivel.vendors import W3
-from time import sleep
 from sys import exit
 import math
 import time
@@ -107,7 +106,8 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
     print(cyan('--------------------------'))
     print(white(' '))
 
-    blankInput = input('Press Enter to continue...\n')
+    if interactive == 'N':
+        input('Press Enter to continue...\n')
 
     if lowerDiff < 0 or upperDiff < 0:
         print('Error: Your rates are too high or low for a real range')
@@ -611,7 +611,13 @@ start()
 orders = []
 initializor = 0
 
-recoverString = input('Do you need to recover your orders from a crash? (y/n) : ').upper()
+interactive = os.getenv("INTERACTIVE", "F")[0]
+
+if interactive == 'Y':
+    recoverString = input('Do you need to recover your orders from a crash? (y/n) : ').upper()
+else:
+    recoverString = os.getenv("RECOVER", "N")[0]
+
 loop = True
 while loop == True:
 
