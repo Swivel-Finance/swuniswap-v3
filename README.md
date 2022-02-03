@@ -25,6 +25,7 @@ A Uniswap v3-esque implementation for Swivel's Orderbook.
 # **Introduction:**
 
 Set your upper and lower ranges in /constants and let Swuniswap-v3 run things from there!
+(We suggest your ranges are equally distributed around market rates)
 
 General Strategy Information: https://swivel.substack.com/p/market-making-in-yield-markets
 
