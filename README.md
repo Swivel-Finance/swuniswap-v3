@@ -24,13 +24,13 @@ A Uniswap v3-esque implementation for Swivel's Orderbook.
 
 # **Introduction:**
 
-Set your upper and lower ranges in /constants and let Swuniswap-v3 run things from there!
+Set your upper and lower ranges in `/constants` and let Swuniswap-v3 run things from there!
 
 (We suggest you place your ranges equally around market rates)
 
 General Strategy Information: https://swivel.substack.com/p/market-making-in-yield-markets
 
-This strategy takes a user defined range and allocates user liquidity across that range, similar to Uniswap v3.
+This strategy takes a user-defined range and allocates user liquidity across that range, similar to Uniswap v3.
 
 After this initial liquidity allocation, the strategy continuously adjusts prices according to the factors discussed in the article above (Underlying Rates and Theta).
 
@@ -41,7 +41,7 @@ Specifically, the strategy accomplishes this by ensuring orders are only valid f
 ## Installation
 
 #### Install/ensure compatable python version
-This is a python project, i'm just going to assume you have a python available. If not, do that first.
+This is a python project, i'm just going to assume you have a python installed. If not, do that first.
 Scrivel expects at least a Python version of 3.7.3
 
 #### Assure you have pip available
