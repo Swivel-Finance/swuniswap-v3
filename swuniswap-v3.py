@@ -611,7 +611,7 @@ start()
 orders = []
 initializor = 0
 
-interactive = os.getenv("INTERACTIVE", "F")[0]
+interactive = os.getenv("INTERACTIVE", "Y")[0]
 
 if interactive == 'Y':
     recoverString = input('Do you need to recover your orders from a crash? (y/n) : ').upper()
