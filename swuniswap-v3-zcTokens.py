@@ -100,7 +100,8 @@ def initialPositionCreation(underlying, maturity, upperRate, lowerRate, amount, 
     print(cyan('--------------------------'))
     print(white(' '))
 
-    blankInput = input('Press Enter to continue...\n')
+    if interactive == 'Y':
+        input('Press Enter to continue...\n')
 
     if lowerDiff < 0 or upperDiff < 0:
         print('Error: Your rates are too high or low for a real range')
@@ -401,9 +402,14 @@ def adjustAndQueue(underlying, maturity, expiryLength, orders):
 
     compoundRateDiff = truncate(((newCompoundRate - compoundRate) / compoundRate), 8)
 
+    prevTime = json.load(open('storage/time.json'))
+
     # establish the impact that time should make
     timeDiff = maturity - time.time()
-    timeModifier = expiryLength / timeDiff
+
+    maturityDiff = maturity - prevTime
+    runDiff = time.time() - prevTime
+    timeModifier = runDiff / maturityDiff
     newExpiry = float(time.time()) + expiryLength
 
     verb = ''
@@ -423,7 +429,7 @@ def adjustAndQueue(underlying, maturity, expiryLength, orders):
         print(white('This ') + yellow(str(truncate((float(compoundRateDiff)*100*float(COMPOUND_RATE_LEAN)),6))+'%') + white(' change does') + yellow(' not ') + white('impact nToken prices.\n'))
 
     
-    print(str(expiryLength)+' seconds have passed since the last quote refresh.')
+    print(str(truncate(runDiff,0))+' seconds have passed since the last quote refresh.')
     print('This has' + red(' decreased ') + white('nToken prices:'))
     print(cyan(str(timeModifier*100)+'%\n'))
 
@@ -585,7 +591,7 @@ def rangeMultiTickMarketMake(underlying, maturity, upperRate, lowerRate, amount,
 #-----------------------------------------------------Setup-------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------
 
-provider = Web3.HTTPProvider("<YOUR_PROVIDER_KEY>") # Can be left blank. Orders can be created without a provider.
+provider = Web3.HTTPProvider("<YOUR_PROVIDER_KEY>") # Can be left blank. Orders can be created without a working provider.
 vendor = W3(provider, PUBLIC_KEY)
 
 if NETWORK_STRING == "mainnet":
@@ -605,7 +611,13 @@ start()
 orders = []
 initializor = 0
 
-recoverString = input('Do you need to recover your orders from a crash? (y/n) : ').upper()
+interactive = os.getenv("INTERACTIVE", "Y")[0]
+
+if interactive == 'Y':
+    recoverString = input('Do you need to recover your orders from a crash? (y/n) : ').upper()
+else:
+    recoverString = os.getenv("RECOVER", "N")[0]
+
 loop = True
 while loop == True:
 
@@ -622,23 +634,32 @@ while loop == True:
 
             orders = combineAndPlace(queuedOrders,queuedOrderSignatures, timeDiff, newExpiry)
 
-        with open("orders/orders.json", "w", encoding="utf-8") as writeJsonfile:
+        currentTime = truncate(time.time(),0)
+
+        with open("storage/orders.json", "w", encoding="utf-8") as writeJsonfile:
             json.dump(orders, writeJsonfile, indent=4,default=str) 
-        with open("orders/compound.json", "w", encoding="utf-8") as writeJsonfile:
+        with open("storage/compound.json", "w", encoding="utf-8") as writeJsonfile:
             json.dump(compoundRate, writeJsonfile, indent=4,default=str) 
+        with open("storage/time.json", "w", encoding="utf-8") as writeJsonfile:
+            json.dump(currentTime, writeJsonfile, indent=4,default=str) 
     else:
         try:
-            orders = json.load(open('orders/orders.json'))
-            compoundRate = json.load(open('orders/compound.json'))
+            orders = json.load(open('storage/orders.json'))
+            compoundRate = json.load(open('storage/compound.json'))
 
             (queuedOrders, queuedOrderSignatures, timeDiff, newExpiry) = adjustAndQueue(UNDERLYING, MATURITY, EXPIRY_LENGTH, orders)
 
             orders = combineAndPlace(queuedOrders,queuedOrderSignatures, timeDiff, newExpiry)
 
-            with open("orders/orders.json", "w", encoding="utf-8") as writeJsonfile:
+            recoverString = 'N'
+            currentTime = truncate(time.time(),0)
+
+            with open("storage/orders.json", "w", encoding="utf-8") as writeJsonfile:
                 json.dump(orders, writeJsonfile, indent=4,default=str) 
-            with open("orders/compound.json", "w", encoding="utf-8") as writeJsonfile:
+            with open("storage/compound.json", "w", encoding="utf-8") as writeJsonfile:
                 json.dump(compoundRate, writeJsonfile, indent=4,default=str)
+            with open("storage/time.json", "w", encoding="utf-8") as writeJsonfile:
+                json.dump(currentTime, writeJsonfile, indent=4,default=str)
         except:
             print('No orders to recover...')
             input('Press enter to exit...')
