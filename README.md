@@ -24,11 +24,14 @@ A Uniswap v3-esque implementation for Swivel's Orderbook.
 
 # **Introduction:**
 
-Set your upper and lower ranges in `/constants` and let Swuniswap-v3 run things from there!
-
-(We suggest you place your ranges equally around market rates)
+Setting up `/constants`:
+1. Chose your Market (Token and Maturity)
+2. Set up your position:
+  a. Set your upper and lower ranges
+  b. Set how many nTokens or zcTokens you want to use (assuming market price is in the middle of your range)
 
 General Strategy Information: https://swivel.substack.com/p/market-making-in-yield-markets
+(We suggest you place your ranges equally around market rates)
 
 This strategy takes a user-defined range and allocates user liquidity across that range, similar to Uniswap v3.
 
