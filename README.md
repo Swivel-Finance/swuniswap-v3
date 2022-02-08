@@ -28,7 +28,7 @@ Setting up `/constants`:
 1. Chose your Market (Token and Maturity)
 2. Set up your position:
     - Set your upper and lower ranges
-    - Set how many nTokens or zcTokens you want to use (assuming market price is in the middle of your range)
+    - Set how many nTokens or zcTokens you want to use (assuming the current rate is in the middle of your range)
 
 General Strategy Information: https://swivel.substack.com/p/market-making-in-yield-markets
 (We suggest you place your ranges equally around market rates)
